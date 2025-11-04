@@ -1,0 +1,151 @@
+include: [":res:IDE/styles.txt"];
+
+size: 512,384;
+
+bg_colour: 220;
+
+menu:
+{
+	padding: 4;
+
+	align: fit;
+
+	bg:
+	Shadow(indent: -3; width: 8; roundness: 0.85; colour: 0,32),
+	Fill(colour: 240; corner: 6);
+	
+	item:
+	{
+		transition: 0.125;
+		render: false;
+
+		size: 26;
+
+		fg: [Text(indent: 10,4; colour: 32; font: Medium; value: &value; justify: left)];
+		
+		@State hover:
+		{
+			bg: [Fill(indent: 0,1; corner: 4; colour: 248)];			
+		};
+
+		@State focused:
+		{
+			bg: [Border(indent: 0,1; corner: 4; colour: 220)];
+			
+			@State hover:
+			{
+				bg: 
+				Fill(indent: 0,1; corner: 4; colour: 248),
+				Border(indent: 0,1; corner: 4; colour: 220);
+			};
+		};
+	};
+};
+
+Header:
+{
+	padding: 16,8;
+	
+	bg_colour: 255;
+
+	bg: Text(font: Medium; value: &value; justify: center; colour: 32);
+
+	size: 48;
+	
+	Popup:
+	{
+		size: 24;
+		bg: TriangleFill(indent: 4,5; direction: bottom; colour: 192; corner: 3);
+		
+		@Alias menu;
+	};
+};
+
+Body:
+{
+	padding: 16;
+	
+	bg: InnerShadow(width: 0,3,0,0; colour: 0,32);
+};
+
+Popup:
+{
+	margin: 2;
+	
+	size: 96,28;
+
+	bg: 
+	Fill(width: 2; colour: 232; corner: 2), 
+	Text(font: Medium; value: &value; indent: 8,2; justify: center; colour: 72);
+
+	@Alias menu;
+};
+
+Control:
+{
+	margin: 10;
+	padding: 0,0,0,24;
+
+	bg: Text(font: Medium; value: &value; justify: bottom; colour: 96);
+
+	continuous:
+	{
+		render: x4;
+		size: 64;
+
+		bg: 
+		Rotate
+		(
+			range: 0.375,0.75; 
+			angle: &value_normalized; 
+			
+			content: 
+			Align
+			(
+				indent: 5;
+				position: right;
+				size: 8,2;
+				
+				content: Fill(corner: 1; colour: 128)
+			)
+		),
+		Circle(range: 0.375,0.75; colour: 128; width: 2);
+	};
+
+	boolean:
+	{
+		transition: 0.125;
+	
+		margin: 0,14;
+		size: 64,36;
+
+		bg: 
+		Border(colour: 128; width: 2; corner: 8),
+		Text(font: Medium; value: &value; justify: center; indent: 8,2; colour: 72);
+
+		@State hover:
+		{
+			bg:
+			CircleGradient(from: 255,128; to: 255,0),
+			Border(colour: 128; width: 2; corner: 8),
+			Text(font: Medium; value: &value; justify: center; indent: 8,2; colour: 72);
+		};
+
+		@State selected:
+		{
+			bg:
+			Shadow(colour: 255; indent: -4),
+			Fill(indent: 1; colour: 255,128; corner: 8),
+			CircleGradient(from: 255,128; to: 255,0),
+			Border(colour: 128; width: 2; corner: 8),
+			Text(font: Medium; value: &value; justify: center; indent: 8,2; colour: 72);
+		};
+	};
+
+	enumeration:
+	{
+		inherit: boolean;
+
+		@Alias menu;
+	};
+};

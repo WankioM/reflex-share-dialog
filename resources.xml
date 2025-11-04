@@ -1,0 +1,9 @@
+<resources output="code/resources.cpp">
+
+	<ShareBox>
+
+		<folder path="resources" public="true" compress="auto"/>
+
+	</ShareBox>
+
+</resources>
