@@ -3,10 +3,11 @@
 
 
 
-//
-//
 
 REFLEX_BEGIN_INTERNAL(ShareBox)
+
+
+
 
 struct InstanceImpl :
 	public Instance,

@@ -8,6 +8,21 @@
 
 REFLEX_BEGIN_INTERNAL(ShareBox)
 
+
+// Animation helper function
+void Appear(GLX::Object& obj, bool value)
+{
+	auto from = value ? 0.0f : 1.0f;
+	auto to = value ? 1.0f : 0.0f;
+
+	auto animation = GLX::CreateOpacityAnimation(K32("appear"), from, to);
+	animation->SetTime(0.25f);  // ← Changed from . to ->
+
+	GLX::Run(obj, K32("appear"), animation);
+
+	SetProperty(obj, "entered", value);
+}
+
 class ViewImpl : public View
 {
 public:
@@ -150,6 +165,12 @@ ViewImpl::ViewImpl(Instance& instance)  // ← Changed
 	// Remove button (right-aligned, flex to push it)
 	GLX::AddInlineFlex(m_shared_user_row, m_remove_button, GLX::kOrientationFar);
 
+
+	// Start with invite section visible (toggle off)
+	GLX::SetOpacity(m_invite_heading, K32("appear"), 1.0f);
+	GLX::SetOpacity(m_email_input_container, K32("appear"), 1.0f);
+	GLX::SetOpacity(m_shared_user_row, K32("appear"), 1.0f);
+
 }
 
 void ViewImpl::OnResetState(Key32 context)
@@ -180,7 +201,16 @@ bool ViewImpl::OnEvent(GLX::Object& src, GLX::Event& e)
 			GLX::SetState(m_toggle_switch, "active", m_toggle_active);
 			GLX::SetState(m_toggle_knob, "active", m_toggle_active);
 
-			// Notify app of state change
+			// Animate invite section visibility
+			// When toggle is ON (anyone can access), HIDE invite section
+			// When toggle is OFF, SHOW invite section
+			bool show_invite = !m_toggle_active;
+
+			Appear(m_invite_heading, show_invite);
+			Appear(m_email_input_container, show_invite);
+			Appear(m_shared_user_row, show_invite);
+
+			// Notify instance
 			instance->SetSharingEnabled(m_toggle_active);
 
 			return true;
@@ -262,11 +292,11 @@ void ViewImpl::OnUpdate()
 	GLX::SetState(m_toggle_switch, "active", m_toggle_active);
 	GLX::SetState(m_toggle_knob, "active", m_toggle_active);
 
-	// Update URL text if needed
-	// GLX::SetText(m_url_text, app->GetShareLink());
-
-	// You could dynamically populate shared users here
-	// For now, the styles have static values using &name and &email bindings
+	// Update invite section visibility (without animation)
+	bool show_invite = !m_toggle_active;
+	GLX::SetOpacity(m_invite_heading, K32("appear"), show_invite ? 1.0f : 0.0f);
+	GLX::SetOpacity(m_email_input_container, K32("appear"), show_invite ? 1.0f : 0.0f);
+	GLX::SetOpacity(m_shared_user_row, K32("appear"), show_invite ? 1.0f : 0.0f);
 }
 
 REFLEX_END_INTERNAL
