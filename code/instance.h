@@ -32,6 +32,13 @@ public:
 
 	static TRef <Instance> Create(System::AudioPlugin & instance);
 
+	// Add these methods:
+	virtual void SetSharingEnabled(bool enabled) = 0;
+	virtual bool IsSharingEnabled() const = 0;
+	virtual void CopyShareLinkToClipboard() = 0;
+	virtual void SendInvite(const CString& email) = 0;
+	virtual void RemoveSharedUser() = 0;
+
 
 
 protected:

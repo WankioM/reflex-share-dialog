@@ -41,6 +41,36 @@ struct InstanceImpl :
 	{
 	}
 
+	// View interface methods
+	virtual void SetSharingEnabled(bool enabled) override
+	{
+		m_sharing_enabled = enabled;
+		Notify(true);  // Update view
+	}
+
+	virtual bool IsSharingEnabled() const override
+	{
+		return m_sharing_enabled;
+	}
+
+	virtual void CopyShareLinkToClipboard() override
+	{
+		Print(output, "Copy link to clipboard");
+		// TODO: Implement clipboard functionality
+	}
+
+	virtual void SendInvite(const CString& email) override
+	{
+		Print(output, "Send invite to:", email);
+		// TODO: Implement invite functionality
+	}
+
+	virtual void RemoveSharedUser() override
+	{
+		Print(output, "Remove shared user");
+		// TODO: Implement remove user functionality
+	}
+
 	//Bootstrap::AudioPlugin callbacks
 	//implement these callbacks to process/generate audio
 
@@ -155,6 +185,8 @@ struct InstanceImpl :
 	decltype (&InstanceImpl::GenerateWaveform<0>) m_generatefn;
 
 	decltype (&InstanceImpl::ProcessFX) m_fxfn;
+
+	bool m_sharing_enabled;
 };
 
 REFLEX_END_INTERNAL
