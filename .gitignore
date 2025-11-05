@@ -1,0 +1,4 @@
+project/win/.vs/ 
+project/win/output/ 
+project/win/vcxproj/Debug/ 
+project/win/vcxproj/*.user 
