@@ -61,6 +61,12 @@
 };
 
 
+@Bitmap iconCopySelected: {
+    path: "/C:\\Users\\VICTUS\\Documents\\DesktopApps\\ShareBox\\resources\\icons\\icons-copy-selected.png";
+    antialias: true;
+};
+
+
 
 @Colour bg_white: 255, 255, 255;
 @Colour surface: 245, 245, 250;
@@ -202,6 +208,18 @@ CopyIcon: {
     bg: Fill(colour: iconCopy; corner: 6),
  Image(bitmap: iconCopy; fit: contain; anchor: center);
 margin:16,16,0,8;
+
+	@State hover: {
+	size:26;
+		bg:
+			Image(bitmap:iconCopySelected; fit:contain; anchor: center ; color: 10, 10, 10);
+};
+	@State selected: {
+	size:24;
+		bg:
+			Image(bitmap:iconCopySelected; fit:contain; anchor: center );
+};
+
 };
 
 // Invite Section

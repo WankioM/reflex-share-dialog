@@ -225,7 +225,6 @@ bool ViewImpl::OnEvent(GLX::Object& src, GLX::Event& e)
 			// When toggle is ON (anyone can access), HIDE invite section
 			// When toggle is OFF, SHOW invite section
 			bool show_invite = !m_toggle_active;
-			GLX::SetOpacity(m_invite_section, K32("appear"), show_invite ? 1.0f : 0.0f);
 
 			// Pass m_dialog to enable size animation
 			
