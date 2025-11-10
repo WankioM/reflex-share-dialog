@@ -25,20 +25,33 @@ void Appear(GLX::Object& obj, bool value)
 	SetProperty(obj, "entered", value);
 }
 
-void ChangeSize(GLX::Object& obj, bool value) {
+void ChangeSize(GLX::Object& dialog, GLX::Object& invite_section, bool expanding) {
 
 	// Create property animation for the size property
-	auto size_from = GLX::Detail::ComputeContentSize(obj);
-	// auto size_to = New<GLX::Size>(375.0f, height_to);
+	auto size_from = dialog.GetRect().size;
+	auto invite_height = invite_section.GetRect().size.h;
 
-	auto size_animation = GLX::CreateInterpolatedAnimation([size_from](GLX::Object& target, float x)
+	auto size_to = size_from;
+	if (expanding) {
+		// Growing: current + invite section height
+		size_to.h = size_from.h + invite_height;
+	}
+	else {
+		// Collapsing: current - invite section height
+		size_to.h = size_from.h - invite_height;
+	}
+
+	// Create animation from current size to target size
+	auto size_animation = GLX::CreateInterpolatedAnimation(
+		[size_from, size_to](GLX::Object& target, float x)
 		{
-			auto w = Reflex::LinearInterpolate(x, 0.0f, size_from.w);
-			auto h = Reflex::LinearInterpolate(x, 0.0f, size_from.h);
-			GLX::SetBounds(target, K32("changesize"), { }, { w,h });
-		});
+			auto w = Reflex::LinearInterpolate(x, size_from.w, size_to.w);
+			auto h = Reflex::LinearInterpolate(x, size_from.h, size_to.h);
+			GLX::SetBounds(target, K32("changesize"), {}, { w, h });
+		}
+	);
 
-	GLX::Run(obj, K32("resize"),0.25f, size_animation);
+	GLX::Run(dialog, K32("resize"), 0.25f, size_animation);
 
 }
 
@@ -89,7 +102,7 @@ private:
 	GLX::Object m_invite_heading;
 	GLX::Object m_email_input_container;
 	GLX::Object m_email_icon;
-	GLX::Object m_email_input;
+	GLX::TextArea m_email_input;
 	GLX::Button m_invite_button;
 
 	// Shared user row
@@ -110,7 +123,9 @@ ViewImpl::ViewImpl(Instance& instance)  // ← Changed
 	instance(instance),  // ← Changed
 	m_invite_button(L"Invite"),
 	m_remove_button(L"Remove"),
+	m_email_input(false),
 	m_toggle_active(false)
+
 {
 	// Make root resizable
 	Data::SetBool(SELF, GLX::kresize, true);
@@ -167,7 +182,9 @@ ViewImpl::ViewImpl(Instance& instance)  // ← Changed
 	GLX::SetFlow(m_email_input_container, GLX::kFlowX);
 
 	GLX::AddInline(m_email_input_container, m_email_icon);
-	GLX::AddInlineFlex(m_email_input_container, m_email_input);
+	// Get the editable content area of the TextArea
+	auto email_content = m_email_input.GetContent();
+	GLX::AddInlineFlex(m_email_input_container, email_content);
 
 	// Invite button (floated right)
 	GLX::AddFloat(m_email_input_container, m_invite_button, GLX::kAlignmentRight);
@@ -230,7 +247,7 @@ bool ViewImpl::OnEvent(GLX::Object& src, GLX::Event& e)
 			// Pass m_dialog to enable size animation
 			
 			Appear(m_invite_section, show_invite);
-			ChangeSize(m_dialog, show_invite);
+			ChangeSize(m_dialog,m_invite_section, show_invite);
 			
 
 			// Notify instance
@@ -248,10 +265,22 @@ bool ViewImpl::OnEvent(GLX::Object& src, GLX::Event& e)
 		}
 
 		// Invite button clicked
+		// Invite button clicked
 		if (src == m_invite_button)
 		{
-			// Get email from input (you'd need to handle input properly)
-			instance->SendInvite("email@example.com");
+			// Get the text from the email input
+			auto email_text = GetText(m_email_input.GetContent());
+
+			// Convert to UTF-8 string for the app layer
+			auto email_utf8 = Data::EncodeUTF8(email_text);
+			auto email_string = Data::Unpack<CString::View>(email_utf8);
+
+			// Send the invite with actual email
+			instance->SendInvite(email_string);
+
+			// Optional: Clear the input after sending
+			GLX::ClearText(m_email_input.GetContent());
+
 			return true;
 		}
 
@@ -294,7 +323,7 @@ void ViewImpl::OnSetStyle(const GLX::Style& style)
 	m_invite_heading.SetStyle(style["InviteHeading"]);
 	m_email_input_container.SetStyle(style["EmailInputContainer"]);
 	m_email_icon.SetStyle(style["EmailIcon"]);
-	m_email_input.SetStyle(style["EmailInput"]);
+	m_email_input.GetContent().SetStyle(style["EmailInput"]);
 	m_invite_button.SetStyle(style["InviteButton"]);
 
 	// Shared user row

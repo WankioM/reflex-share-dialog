@@ -223,6 +223,10 @@ margin:16,16,0,8;
 };
 
 // Invite Section
+
+InviteSection: {
+    size: auto, auto;
+};
 InviteHeading: {
     size: auto, 24;
     margin: 4,10;

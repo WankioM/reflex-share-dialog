@@ -25,20 +25,33 @@ void Appear(GLX::Object& obj, bool value)
 	SetProperty(obj, "entered", value);
 }
 
-void ChangeSize(GLX::Object& obj, bool value) {
+void ChangeSize(GLX::Object& dialog, GLX::Object& invite_section, bool expanding) {
 
 	// Create property animation for the size property
-	auto size_from = GLX::Detail::ComputeContentSize(obj);
-	// auto size_to = New<GLX::Size>(375.0f, height_to);
+	auto size_from = dialog.GetRect().size;
+	auto invite_height = invite_section.GetRect().size.h;
 
-	auto size_animation = GLX::CreateInterpolatedAnimation([size_from](GLX::Object& target, float x)
+	auto size_to = size_from;
+	if (expanding) {
+		// Growing: current + invite section height
+		size_to.h = size_from.h + invite_height;
+	}
+	else {
+		// Collapsing: current - invite section height
+		size_to.h = size_from.h - invite_height;
+	}
+
+	// Create animation from current size to target size
+	auto size_animation = GLX::CreateInterpolatedAnimation(
+		[size_from, size_to](GLX::Object& target, float x)
 		{
-			auto w = Reflex::LinearInterpolate(x, 0.0f, size_from.w);
-			auto h = Reflex::LinearInterpolate(x, 0.0f, size_from.h);
-			GLX::SetBounds(target, K32("changesize"), { }, { w,h });
-		});
+			auto w = Reflex::LinearInterpolate(x, size_from.w, size_to.w);
+			auto h = Reflex::LinearInterpolate(x, size_from.h, size_to.h);
+			GLX::SetBounds(target, K32("changesize"), {}, { w, h });
+		}
+	);
 
-	GLX::Run(obj, K32("resize"),0.25f, size_animation);
+	GLX::Run(dialog, K32("resize"), 0.25f, size_animation);
 
 }
 
@@ -225,11 +238,12 @@ bool ViewImpl::OnEvent(GLX::Object& src, GLX::Event& e)
 			// When toggle is ON (anyone can access), HIDE invite section
 			// When toggle is OFF, SHOW invite section
 			bool show_invite = !m_toggle_active;
+			GLX::SetOpacity(m_invite_section, K32("appear"), show_invite ? 1.0f : 0.0f);
 
 			// Pass m_dialog to enable size animation
 			
 			Appear(m_invite_section, show_invite);
-			ChangeSize(m_dialog, show_invite);
+			ChangeSize(m_dialog,m_invite_section, show_invite);
 			
 
 			// Notify instance
