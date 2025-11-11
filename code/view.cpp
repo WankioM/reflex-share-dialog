@@ -183,8 +183,9 @@ ViewImpl::ViewImpl(Instance& instance)  // ← Changed
 
 	GLX::AddInline(m_email_input_container, m_email_icon);
 	// Get the editable content area of the TextArea
-	auto email_content = m_email_input.GetContent();
-	GLX::AddInlineFlex(m_email_input_container, email_content);
+	GLX::AddInlineFlex(m_email_input_container, m_email_input);
+	GLX::SetText(m_email_input.GetContent(), L"test@email.com");
+	
 
 	// Invite button (floated right)
 	GLX::AddFloat(m_email_input_container, m_invite_button, GLX::kAlignmentRight);
@@ -264,21 +265,25 @@ bool ViewImpl::OnEvent(GLX::Object& src, GLX::Event& e)
 			return true;
 		}
 
-		// Invite button clicked
+
+		
 		// Invite button clicked
 		if (src == m_invite_button)
 		{
-			// Get the text from the email input
+			// Use GetContent() directly without storing
 			auto email_text = GetText(m_email_input.GetContent());
+			Print(output, "Email text:", email_text);
+			
 
 			// Convert to UTF-8 string for the app layer
 			auto email_utf8 = Data::EncodeUTF8(email_text);
 			auto email_string = Data::Unpack<CString::View>(email_utf8);
+			Print(output, "Email string:", email_string);
 
 			// Send the invite with actual email
 			instance->SendInvite(email_string);
 
-			// Optional: Clear the input after sending
+			// Clear the input after sending
 			GLX::ClearText(m_email_input.GetContent());
 
 			return true;
@@ -291,6 +296,8 @@ bool ViewImpl::OnEvent(GLX::Object& src, GLX::Event& e)
 			return true;
 		}
 	}
+
+	
 
 	return Bootstrap::View::OnEvent(src, e);
 }
@@ -322,8 +329,8 @@ void ViewImpl::OnSetStyle(const GLX::Style& style)
 	m_invite_section.SetStyle(style["InviteSection"]);
 	m_invite_heading.SetStyle(style["InviteHeading"]);
 	m_email_input_container.SetStyle(style["EmailInputContainer"]);
+	m_email_input.SetStyle(style["EmailInput"]);
 	m_email_icon.SetStyle(style["EmailIcon"]);
-	m_email_input.GetContent().SetStyle(style["EmailInput"]);
 	m_invite_button.SetStyle(style["InviteButton"]);
 
 	// Shared user row
